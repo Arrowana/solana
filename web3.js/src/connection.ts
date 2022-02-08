@@ -1810,7 +1810,7 @@ export type KeyedAccountInfo = {
  * Callback function for account change notifications
  */
 export type AccountChangeCallback = (
-  accountInfo: AccountInfo<Buffer>,
+  accountInfo: AccountInfo<string[]>,
   context: Context,
 ) => void;
 
@@ -1833,7 +1833,7 @@ type AccountSubscriptionInfo = {
  * Callback function for program account change notifications
  */
 export type ProgramAccountChangeCallback = (
-  keyedAccountInfo: KeyedAccountInfo,
+  keyedAccountInfo: {accountId: string; accountInfo: AccountInfo<string[]>},
   context: Context,
 ) => void;
 
@@ -4181,8 +4181,9 @@ export class Connection {
   /**
    * @internal
    */
-  _wsOnAccountNotification(notification: object) {
-    const res = create(notification, AccountNotificationResult);
+  _wsOnAccountNotification(notification: any) {
+    //const res = create(notification, AccountNotificationResult);
+    const res = notification;
     for (const sub of Object.values(this._accountChangeSubscriptions)) {
       if (sub.subscriptionId === res.subscription) {
         sub.callback(res.result.value, res.result.context);
@@ -4234,11 +4235,11 @@ export class Connection {
   /**
    * @internal
    */
-  _wsOnProgramAccountNotification(notification: Object) {
-    const res = create(notification, ProgramAccountNotificationResult);
+  _wsOnProgramAccountNotification(notification: any) {
+    //const res = create(notification, ProgramAccountNotificationResult);
     for (const sub of Object.values(this._programAccountChangeSubscriptions)) {
-      if (sub.subscriptionId === res.subscription) {
-        const {value, context} = res.result;
+      if (sub.subscriptionId === notification.subscription) {
+        const {value, context} = notification.result;
         sub.callback(
           {
             accountId: value.pubkey,

@@ -473,7 +473,8 @@ export class Transaction {
 
     const message = this._compile();
     this._partialSign(message, ...uniqueSigners);
-    this._verifySignatures(message.serialize(), true);
+    // Avoid verifying signatures because we waste time here
+    // this._verifySignatures(message.serialize(), true);
   }
 
   /**
