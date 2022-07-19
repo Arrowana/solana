@@ -1341,6 +1341,7 @@ const GetSignaturesForAddressRpcResult = jsonRpcResult(
 /***
  * Expected JSON RPC response for the "accountNotification" message
  */
+// @ts-ignore
 const AccountNotificationResult = pick({
   subscription: number(),
   result: notificationResultAndContext(AccountInfoResult),
@@ -1998,7 +1999,7 @@ export type KeyedAccountInfo = {
  * Callback function for account change notifications
  */
 export type AccountChangeCallback = (
-  accountInfo: AccountInfo<Buffer>,
+  accountInfo: AccountInfo<string[]>,
   context: Context,
 ) => void;
 
@@ -2006,7 +2007,7 @@ export type AccountChangeCallback = (
  * Callback function for program account change notifications
  */
 export type ProgramAccountChangeCallback = (
-  keyedAccountInfo: KeyedAccountInfo,
+  keyedAccountInfo: {accountId: PublicKey; accountInfo: AccountInfo<Buffer>},
   context: Context,
 ) => void;
 
@@ -4521,14 +4522,15 @@ export class Connection {
   /**
    * @internal
    */
-  _wsOnAccountNotification(notification: object) {
-    const {result, subscription} = create(
-      notification,
-      AccountNotificationResult,
-    );
+  _wsOnAccountNotification(notification: any) {
+    // const {result, subscription} = create(
+    //   notification,
+    //   AccountNotificationResult,
+    // );
+    const {subscription, result} = notification;
     this._handleServerNotification<AccountChangeCallback>(subscription, [
-      result.value,
-      result.context,
+      result.value, // result.value,
+      result.context, // result.context,
     ]);
   }
 
@@ -4609,11 +4611,13 @@ export class Connection {
     publicKey: PublicKey,
     callback: AccountChangeCallback,
     commitment?: Commitment,
+    encoding: 'base64' | 'base64+zstd' = 'base64',
   ): ClientSubscriptionId {
     const args = this._buildArgs(
       [publicKey.toBase58()],
       commitment || this._commitment || 'finalized', // Apply connection/server default.
-      'base64',
+      // @ts-ignore
+      encoding,
     );
     return this._makeSubscription(
       {
