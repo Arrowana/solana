@@ -37,6 +37,15 @@ export class MessageAccountKeys {
     return;
   }
 
+  getKeyMap(): Map<string, number> {
+    return this.keySegments()
+      .flat()
+      .reduce((acc, key, index) => {
+        acc.set(key.toBase58(), index);
+        return acc;
+      }, new Map());
+  }
+
   get length(): number {
     return this.keySegments().flat().length;
   }
@@ -50,12 +59,7 @@ export class MessageAccountKeys {
       throw new Error('Account index overflow encountered during compilation');
     }
 
-    const keyIndexMap = new Map();
-    this.keySegments()
-      .flat()
-      .forEach((key, index) => {
-        keyIndexMap.set(key.toBase58(), index);
-      });
+    const keyIndexMap = this.getKeyMap();
 
     const findKeyIndex = (key: PublicKey) => {
       const keyIndex = keyIndexMap.get(key.toBase58());
