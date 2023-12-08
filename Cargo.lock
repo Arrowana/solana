@@ -4746,9 +4746,9 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.189"
+version = "1.0.193"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e422a44e74ad4001bdc8eede9a4570ab52f71190e9c076d14369f38b9200537"
+checksum = "25dd9975e68d0cb5aa1120c288333fc98731bd1dd12f561e468ea4728c042b89"
 dependencies = [
  "serde_derive",
 ]
@@ -4764,9 +4764,9 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.189"
+version = "1.0.193"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e48d1f918009ce3145511378cf68d613e3b3d9137d67272562080d68a2b32d5"
+checksum = "43576ca501357b9b071ac53cdc7da8ef0cbd9493d8df094cd821777ea6e894d3"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4841,9 +4841,9 @@ dependencies = [
 
 [[package]]
 name = "serde_yaml"
-version = "0.9.25"
+version = "0.9.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a49e178e4452f45cb61d0cd8cebc1b0fafd3e41929e996cef79aa3aca91f574"
+checksum = "3cc7a1570e38322cfe4154732e5110f887ea57e22b76f4bfd32b5bdd3368666c"
 dependencies = [
  "indexmap 2.0.2",
  "itoa",
@@ -5353,7 +5353,7 @@ dependencies = [
  "rand 0.8.5",
  "rayon",
  "serde_json",
- "serde_yaml 0.9.25",
+ "serde_yaml 0.9.27",
  "serial_test",
  "solana-clap-utils",
  "solana-cli-config",
@@ -5620,7 +5620,7 @@ dependencies = [
  "lazy_static",
  "serde",
  "serde_derive",
- "serde_yaml 0.9.25",
+ "serde_yaml 0.9.27",
  "solana-clap-utils",
  "solana-sdk",
  "url 2.4.1",
@@ -6010,7 +6010,7 @@ dependencies = [
  "itertools",
  "serde",
  "serde_json",
- "serde_yaml 0.9.25",
+ "serde_yaml 0.9.27",
  "solana-accounts-db",
  "solana-clap-utils",
  "solana-cli-config",
@@ -6143,7 +6143,7 @@ dependencies = [
  "semver 1.0.20",
  "serde",
  "serde_yaml 0.8.26",
- "serde_yaml 0.9.25",
+ "serde_yaml 0.9.27",
  "solana-clap-utils",
  "solana-config-program",
  "solana-logger",
@@ -7412,7 +7412,7 @@ dependencies = [
  "rayon",
  "serde",
  "serde_json",
- "serde_yaml 0.9.25",
+ "serde_yaml 0.9.27",
  "signal-hook",
  "solana-account-decoder",
  "solana-accounts-db",
