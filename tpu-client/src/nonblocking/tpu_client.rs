@@ -1,4 +1,8 @@
+use serde_json::json;
+use solana_rpc_client_api::{config::RpcSendTransactionConfig, request::RpcRequest};
+
 pub use crate::tpu_client::Result;
+use solana_transaction_status::UiTransactionEncoding;
 use {
     crate::tpu_client::{RecentLeaderSlots, TpuClientConfig, MAX_FANOUT_SLOTS},
     bincode::serialize,
@@ -257,6 +261,7 @@ pub struct TpuClient<
 /// throughput
 #[cfg(feature = "spinner")]
 fn send_wire_transaction_futures<'a, P, M, C>(
+    rpc_client: &'a RpcClient,
     progress_bar: &'a ProgressBar,
     progress: &'a SendTransactionProgress,
     index: usize,
@@ -273,34 +278,47 @@ where
     const SEND_TIMEOUT_INTERVAL: Duration = Duration::from_secs(5);
     let sleep_duration = SEND_TRANSACTION_INTERVAL.saturating_mul(index as u32);
     let send_timeout = SEND_TIMEOUT_INTERVAL.saturating_add(sleep_duration);
-    leaders
-        .into_iter()
-        .map(|addr| {
-            timeout_future(
-                send_timeout,
-                sleep_and_send_wire_transaction_to_addr(
-                    sleep_duration,
-                    connection_cache,
-                    addr,
-                    wire_transaction.clone(),
-                ),
-            )
-            .boxed_local() // required to make types work simply
-        })
-        .chain(iter::once(
-            timeout_future(
-                send_timeout,
-                sleep_and_set_message(
-                    sleep_duration,
-                    progress_bar,
-                    progress,
-                    index,
-                    num_transactions,
-                ),
-            )
-            .boxed_local(), // required to make types work simply
-        ))
-        .collect::<Vec<_>>()
+    iter::once(
+        send_transaction_with_sleep(rpc_client, wire_transaction, sleep_duration).boxed_local(),
+    )
+    .chain(iter::once(
+        timeout_future(
+            send_timeout,
+            sleep_and_set_message(
+                sleep_duration,
+                progress_bar,
+                progress,
+                index,
+                num_transactions,
+            ),
+        )
+        .boxed_local(), // required to make types work simply
+    ))
+    .collect::<Vec<_>>()
+}
+
+async fn send_transaction_with_sleep(
+    rpc_client: &RpcClient,
+    wire_transaction: Vec<u8>,
+    sleep_duration: Duration,
+) -> TransportResult<()> {
+    sleep(sleep_duration).await;
+    let serialized_encoded = base64::encode(&wire_transaction);
+    let config = RpcSendTransactionConfig {
+        skip_preflight: true,
+        max_retries: Some(0),
+        preflight_commitment: None,
+        encoding: Some(UiTransactionEncoding::Base64),
+        ..RpcSendTransactionConfig::default()
+    };
+
+    let _ = rpc_client
+        .send::<String>(
+            RpcRequest::SendTransaction,
+            json!([serialized_encoded, config]),
+        )
+        .await;
+    Ok(())
 }
 
 // Wrap an existing future with a timeout.
@@ -572,6 +590,7 @@ where
                             .leader_tpu_service
                             .leader_tpu_sockets(self.fanout_slots);
                         futures.extend(send_wire_transaction_futures(
+                            self.rpc_client(),
                             &progress_bar,
                             &progress,
                             index,

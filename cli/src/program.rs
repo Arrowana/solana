@@ -40,6 +40,7 @@ use {
         account_utils::StateMut,
         bpf_loader, bpf_loader_deprecated,
         bpf_loader_upgradeable::{self, UpgradeableLoaderState},
+        compute_budget::ComputeBudgetInstruction,
         feature_set::FeatureSet,
         instruction::{Instruction, InstructionError},
         loader_instruction,
@@ -1817,7 +1818,10 @@ fn do_process_program_write_and_deploy(
         } else {
             loader_instruction::write(buffer_pubkey, loader_id, offset, bytes)
         };
-        Message::new_with_blockhash(&[instruction], Some(&payer_pubkey), &blockhash)
+        let mut ixs = vec![instruction];
+        ixs.push(ComputeBudgetInstruction::set_compute_unit_price(1000));
+
+        Message::new_with_blockhash(&ixs, Some(&payer_pubkey), &blockhash)
     };
 
     let mut write_messages = vec![];
